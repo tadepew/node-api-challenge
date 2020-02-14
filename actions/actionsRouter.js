@@ -45,7 +45,7 @@ router.post("/postId=:id", validateAction, (req, res) => {
 });
 
 //UPDATE an action
-router.put("/:id", (req, res) => {
+router.put("/:id", validateAction, validateActionId, (req, res) => {
   const { id } = req.params;
   db.update(id, req.body)
     .then(update => {
@@ -71,6 +71,17 @@ router.delete("/:id", (req, res) => {
 });
 
 //custom middleware
+function validateActionId(req, res, next) {
+  const { id } = req.params;
+  db.get(id).then(action => {
+    if (!action) {
+      res.status(400).send(null);
+    } else {
+      next();
+    }
+  });
+}
+
 function validateAction(req, res, next) {
   const newAction = req.body;
   if (!newAction.project_id || !newAction.notes || !newAction.description) {
